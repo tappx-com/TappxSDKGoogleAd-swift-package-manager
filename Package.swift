@@ -22,7 +22,8 @@ let package = Package(
                 .product(name: "TappxSDK", package: "TappxSDK-swift-package-manager"),
                 .product(name: "GoogleMobileAds", package: "swift-package-manager-google-mobile-ads")
             ],
-            path: "TappxGoogleAdsAdapter"
+            path: "TappxGoogleAdsAdapter",
+            publicHeadersPath: "include"
         ),
 
     ]
