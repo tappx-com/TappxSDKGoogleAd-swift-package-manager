@@ -11,7 +11,7 @@
 
 @interface TappxMediationRewardedAd () {
     /// The sample rewarded ad.
-    TappxRewardedViewController *rewardedAd;
+    TappxRewardedAd *rewardedAd;
 
     /// The completion handler to call when the ad loading succeeds or fails.
     GADMediationRewardedLoadCompletionHandler _loadCompletionHandler;
@@ -22,15 +22,6 @@
 @end
 
 @implementation TappxMediationRewardedAd
-static UIViewController* rootVC;
-
-+ (UIViewController *) _getRootVC {
-    return rootVC;
-}
-
-+ (void) _setRootVC:(UIViewController *) vc {
-    rootVC = vc;
-}
 
 - (void)dealloc {
     if(rewardedAd != nil){
@@ -80,14 +71,14 @@ static UIViewController* rootVC;
         if ( isTest != nil && [isTest isEqualToString:@"1" ] )
             [TappxFramework addTappxKey:key testMode:YES];
         else {
-            [TappxFramework addTappxKey:key];
+            [TappxFramework addTappxKey:key fromNonNative:@"googleAd"];
         }
     } else {
         _adEventDelegate = _loadCompletionHandler(nil, [NSError errorWithDomain:GADErrorDomain code:GADErrorInvalidRequest userInfo:nil]);
         return;
     }
     
-    rewardedAd = [[TappxRewardedViewController alloc] initWithDelegate:self];
+    rewardedAd = [[TappxRewardedAd alloc] initWithDelegate:self];
     
     [rewardedAd load];
 }
@@ -122,57 +113,49 @@ static UIViewController* rootVC;
 
 
 #pragma mark TappxRewardedViewControllerDelegate implementation
-- (void)present:(nonnull UIViewController *)viewController {
-    [[TappxMediationRewardedAd _getRootVC] presentViewController:viewController animated:false completion:nil];
-}
 
-- (nonnull UIViewController *)presentViewController {
-    return [TappxMediationRewardedAd _getRootVC];
-}
-
-- (void) tappxRewardedViewControllerDidFinishLoad:(nonnull TappxRewardedViewController*) viewController {
+- (void) tappxRewardedAdDidFinishLoad:(nonnull TappxRewardedAd*) rewardedAd {
     _adEventDelegate = _loadCompletionHandler(self, nil);
 }
 
-- (void) tappxRewardedViewControllerDidFail:(nonnull TappxRewardedViewController*) viewController withError:(nonnull TappxErrorAd*) error {
+- (void) tappxRewardedAdDidFail:(nonnull TappxRewardedAd*) rewardedAd withError:(nonnull TappxErrorAd*) error {
     _adEventDelegate = _loadCompletionHandler(nil, [self convertError:error]);
 }
 
-- (void) tappxRewardedViewControllerClicked:(nonnull TappxRewardedViewController*) viewController {
+- (void) tappxRewardedAdClicked:(nonnull TappxRewardedAd*) rewardedAd {
     [_adEventDelegate reportClick];
 }
 
-- (void) tappxRewardedViewControllerPlaybackFailed:(nonnull TappxRewardedViewController*) viewController {
+- (void) tappxRewardedAdPlaybackFailed:(nonnull TappxRewardedAd*) rewardedAd {
     [_adEventDelegate didFailToPresentWithError:[NSError errorWithDomain:GADErrorDomain code:GADErrorInternalError userInfo:nil]];
 }
 
-- (void) tappxRewardedViewControllerVideoClosed:(nonnull TappxRewardedViewController*) viewController {
+- (void) tappxRewardedAdVideoClosed:(nonnull TappxRewardedAd*) rewardedAd {
     [_adEventDelegate didEndVideo];
     [_adEventDelegate willDismissFullScreenView];
 }
 
-- (void) tappxRewardedViewControllerVideoCompleted:(nonnull TappxRewardedViewController*) viewController {
+- (void) tappxRewardedAdVideoCompleted:(nonnull TappxRewardedAd*) rewardedAd {
     [_adEventDelegate didEndVideo];
 }
 
-- (void) tappxRewardedViewControllerDidAppear:(nonnull TappxRewardedViewController *)viewController {
+- (void) tappxRewardedAdDidAppear:(nonnull TappxRewardedAd *)rewardedAd {
     [_adEventDelegate didStartVideo];
     [_adEventDelegate reportImpression];
 }
 
-- (void) tappxRewardedViewControllerDismissed:(nonnull TappxRewardedViewController *) viewController {
+- (void) tappxRewardedAdDismissed:(nonnull TappxRewardedAd *) rewardedAd {
     [_adEventDelegate didDismissFullScreenView];
 }
 
-- (void) tappxRewardedViewControllerUserDidEarnReward:(nonnull TappxRewardedViewController*) viewController {
+- (void) tappxRewardedAdUserDidEarnReward:(nonnull TappxRewardedAd*) rewardedAd {
     [_adEventDelegate didRewardUser];
 }
 
 - (void)presentFromViewController:(nonnull UIViewController *)viewController {
     if([rewardedAd isReady]) {
-        [TappxMediationRewardedAd _setRootVC:viewController];
         [_adEventDelegate willPresentFullScreenView];
-        [rewardedAd show];
+        [rewardedAd showFrom:viewController];
     } else {
         [_adEventDelegate didFailToPresentWithError:[NSError errorWithDomain:GADErrorDomain code:GADErrorInternalError userInfo:nil]];
     }

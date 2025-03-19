@@ -10,6 +10,6 @@
 #import <TappxFramework/TappxAds.h>
 
 
-@interface TappxMediationInterstitialAd : NSObject<GADMediationInterstitialAd, GADMediationAdapter, TappxInterstitialViewControllerDelegate>
+@interface TappxMediationInterstitialAd : NSObject<GADMediationInterstitialAd, GADMediationAdapter, TappxInterstitialAdDelegate>
 
 @end

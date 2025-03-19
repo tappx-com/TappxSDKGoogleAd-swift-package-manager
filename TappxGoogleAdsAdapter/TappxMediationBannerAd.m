@@ -9,9 +9,7 @@
 #import <stdatomic.h>
 
 @interface TappxMediationBannerAd () {
-    TappxBannerViewController *bannerAd;
-    
-    UIView* adView;
+    TappxBannerView *bannerAd;
     
     GADMediationBannerLoadCompletionHandler _loadCompletionHandler;
     
@@ -25,10 +23,6 @@
     if(bannerAd != nil){
         [bannerAd removeBanner];
         bannerAd = nil;
-    }
-    
-    if(adView != nil) {
-        adView = nil;
     }
 }
 
@@ -72,7 +66,7 @@
         if ( isTest != nil && [isTest isEqualToString:@"1" ] )
             [TappxFramework addTappxKey:key testMode:YES];
         else {
-            [TappxFramework addTappxKey:key];
+            [TappxFramework addTappxKey:key fromNonNative:@"googleAd"];
         }
     }
     else{
@@ -95,8 +89,8 @@
         sizeFrame = CGRectMake(0, 0, 300, 250);
     }
     
-    adView = [[UIView alloc] initWithFrame:sizeFrame];
-    bannerAd = [[TappxBannerViewController alloc] initWithDelegate:self andSize:size andView:adView];
+    bannerAd = [[TappxBannerView alloc] initWithDelegate:self andSize:size];
+    [bannerAd setRootViewController:adConfiguration.topViewController];
     [bannerAd load];
 }
 
@@ -130,34 +124,28 @@
 
 
 - (UIView *)view {
-    return adView;
+    return bannerAd;
 }
 
-//TAPPXBannerDelegate
+//MARK: - TAPPXBannerDelegate
 
--(UIViewController*)presentViewController {
-    return (UIViewController *) _adEventDelegate;
-}
-
--(void) tappxBannerViewControllerDidFinishLoad:(TappxBannerViewController*) vc {
+-(void) tappxBannerViewDidFinishLoad:(TappxBannerView*) vc {
     _adEventDelegate = _loadCompletionHandler(self, nil);
 }
 
--(void) tappxBannerViewControllerDidPress:(TappxBannerViewController*) vc {
+-(void) tappxBannerViewDidPress:(TappxBannerView*) vc {
     [_adEventDelegate reportClick];
 }
 
--(void) tappxBannerViewControllerDidFail:(TappxBannerViewController*) vc withError:(TappxErrorAd*) error {
+-(void) tappxBannerViewDidFail:(TappxBannerView*) vc withError:(TappxErrorAd*) error {
     _adEventDelegate = _loadCompletionHandler(nil, [self convertError:error]);
     
     if(bannerAd != nil){
         [bannerAd removeBanner];
         bannerAd = nil;
     }
-    if (adView != nil)
-        adView = nil;
 }
--(void) tappxBannerViewControllerDidClose:(TappxBannerViewController*) vc {
+-(void) tappxBannerViewDidClose:(TappxBannerView*) vc {
     [_adEventDelegate didDismissFullScreenView];
 }
 

@@ -9,7 +9,7 @@
 #import <stdatomic.h>
 
 @interface TappxMediationInterstitialAd () {
-    TappxInterstitialViewController *interstitialAd;
+    TappxInterstitialAd *interstitialAd;
     
     GADMediationInterstitialLoadCompletionHandler _loadCompletionHandler;
     
@@ -18,14 +18,6 @@
 @end
 
 @implementation TappxMediationInterstitialAd
-static UIViewController* rootVC;
-
-+ (UIViewController *) _getRootVC {
-    return rootVC;
-}
-+ (void) _setRootVC:(UIViewController *)vc {
-    rootVC = vc;
-}
 
 - (void)dealloc {
     if(interstitialAd != nil){
@@ -72,7 +64,7 @@ static UIViewController* rootVC;
         if ( isTest != nil && [isTest isEqualToString:@"1" ] )
             [TappxFramework addTappxKey:key testMode:YES];
         else {
-            [TappxFramework addTappxKey:key];
+            [TappxFramework addTappxKey:key fromNonNative:@"googleAd"];
         }
     } else {
         _adEventDelegate = _loadCompletionHandler(nil, [NSError errorWithDomain:GADErrorDomain code:GADErrorInvalidRequest userInfo:nil]);
@@ -80,7 +72,7 @@ static UIViewController* rootVC;
     }
         
     
-    interstitialAd = [[TappxInterstitialViewController alloc] initWithDelegate:self];
+    interstitialAd = [[TappxInterstitialAd alloc] initWithDelegate:self];
     [interstitialAd load];
 }
 
@@ -112,44 +104,34 @@ static UIViewController* rootVC;
     return nil;
 }
 
-
-- (void)present:(nonnull UIViewController *)viewController {
-    [[TappxMediationInterstitialAd _getRootVC] presentViewController:viewController animated:false completion:nil];
-}
-
--(UIViewController*)presentViewController{
-    return [TappxMediationInterstitialAd _getRootVC];
-}
-
-- (void)tappxInterstitialViewControllerDidFinishLoad:(nonnull TappxInterstitialViewController *)viewController{
+- (void)tappxInterstitialAdDidFinishLoad:(nonnull TappxInterstitialAd *)interstitialAd{
     _adEventDelegate = _loadCompletionHandler(self, nil);
 }
 
-- (void)tappxInterstitialViewControllerDidPress:(nonnull TappxInterstitialViewController *)viewController{
+- (void)tappxInterstitialAdDidPress:(nonnull TappxInterstitialAd *)interstitialAd{
     [_adEventDelegate reportClick];
 }
 
-- (void)tappxInterstitialViewControllerDidClose:(nonnull TappxInterstitialViewController *)viewController{
+- (void)tappxInterstitialAdDidClose:(nonnull TappxInterstitialAd *)interstitialAd{
     [_adEventDelegate didDismissFullScreenView];
 }
 
-- (void)tappxInterstitialViewControllerDidFail:(nonnull TappxInterstitialViewController *)viewController withError:(nonnull TappxErrorAd *)error{
+- (void)tappxInterstitialAdDidFail:(nonnull TappxInterstitialAd *)interstitialAd withError:(nonnull TappxErrorAd *)error{
     _adEventDelegate = _loadCompletionHandler(nil, [self convertError:error]);
 }
 
-- (void)tappxInterstitialViewControllerDidAppear:(nonnull TappxInterstitialViewController *)viewController {
+- (void)tappxInterstitialAdDidAppear:(nonnull TappxInterstitialAd *)interstitialAd {
     [_adEventDelegate reportImpression];
 }
 
-- (void)onTappxInterstitialDismissed:(nonnull TappxInterstitialViewController *)viewController {
+- (void)tappxInterstitialAdDismissed:(nonnull TappxInterstitialAd *)interstitialAd {
     [_adEventDelegate didDismissFullScreenView];
 }
 
 - (void)presentFromViewController:(nonnull UIViewController *)viewController {
     if([interstitialAd isReady]) {
-        [TappxMediationInterstitialAd _setRootVC:viewController];
         [_adEventDelegate willPresentFullScreenView];
-        [interstitialAd show];
+        [interstitialAd showFrom:viewController];
     } else {
         [_adEventDelegate didFailToPresentWithError:[NSError errorWithDomain:GADErrorDomain code:GADErrorInternalError userInfo:nil]];
     }

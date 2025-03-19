@@ -9,6 +9,6 @@
 #import <GoogleMobileAds/GoogleMobileAds.h>
 #import <TappxFramework/TappxAds.h>
 
-@interface TappxMediationBannerAd : NSObject<GADMediationBannerAd, GADMediationAdapter, TappxBannerViewControllerDelegate>
+@interface TappxMediationBannerAd : NSObject<GADMediationBannerAd, GADMediationAdapter, TappxBannerViewDelegate>
 
 @end

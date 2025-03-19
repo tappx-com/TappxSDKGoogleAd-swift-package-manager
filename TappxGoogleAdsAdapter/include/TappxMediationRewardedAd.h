@@ -10,6 +10,6 @@
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 
-@interface TappxMediationRewardedAd : NSObject <TappxRewardedViewControllerDelegate, GADMediationAdapter, GADMediationRewardedAd>
+@interface TappxMediationRewardedAd : NSObject <TappxRewardedAdDelegate, GADMediationAdapter, GADMediationRewardedAd>
 
 @end
