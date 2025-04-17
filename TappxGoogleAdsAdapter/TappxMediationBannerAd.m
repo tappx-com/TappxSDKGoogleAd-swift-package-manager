@@ -52,21 +52,38 @@
       };
     
     NSString* adUnit = adConfiguration.credentials.settings[@"parameter"];
-
-    
     if ( adUnit != nil ) {
         
         NSArray *elements = [adUnit componentsSeparatedByString:@"|"];
-        NSString* key = [elements objectAtIndex: 0];
-        
+        NSString* key = adUnit;
         NSString* isTest = nil;
-        if ( [elements count]  > 1 )
-            isTest = [elements objectAtIndex: 1];
-        
+        NSString* endpoint = nil;
+        if ( [elements count]  > 1 ){
+            key = [elements objectAtIndex: 0];
+            if ( [elements count]  > 1 )
+                isTest = [elements objectAtIndex: 1];
+        }else{
+            elements = [adUnit componentsSeparatedByString:@":"];
+            if ( [elements count]  > 1 ){
+                key = [elements objectAtIndex: 0];
+                for(int i = 1; i < [elements count]; i++) {
+                    NSArray *extraElements = [[elements objectAtIndex:i] componentsSeparatedByString:@"="];
+                    if ( [extraElements count] > 1 ){
+                        if([[extraElements objectAtIndex:0] isEqualToString:@"e"] && ![[extraElements objectAtIndex:1] isEqualToString:@""] && [[extraElements objectAtIndex:1] length] > 3)
+                            endpoint = [extraElements objectAtIndex:1];
+                        if([[extraElements objectAtIndex:0] isEqualToString:@"t"] && ![[extraElements objectAtIndex:1] isEqualToString:@""])
+                            isTest = [extraElements objectAtIndex:1];
+                    }
+                }
+            }
+        }
         if ( isTest != nil && [isTest isEqualToString:@"1" ] )
             [TappxFramework addTappxKey:key testMode:YES];
         else {
             [TappxFramework addTappxKey:key fromNonNative:@"googleAd"];
+        }
+        if (endpoint != nil && ![endpoint isEqualToString:@""] && [endpoint length] > 3){
+            [TappxFramework setEndpoint:endpoint];
         }
     }
     else{
