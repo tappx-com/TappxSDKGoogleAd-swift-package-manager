@@ -12,7 +12,7 @@ let package = Package(
             targets: ["TappxGoogleAdsAdapter"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/tappx-com/TappxSDK-swift-package-manager.git", from: "4.2.11"),
+        .package(url: "https://github.com/tappx-com/TappxSDK-swift-package-manager.git", from: "4.2.12"),
         .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads.git", .upToNextMajor(from: "12.0.0"))
     ],
     targets: [
